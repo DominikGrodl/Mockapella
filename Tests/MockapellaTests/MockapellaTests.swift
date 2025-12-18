@@ -9,20 +9,118 @@ import XCTest
 import MockapellaMacros
 
 let testMacros: [String: Macro.Type] = [
-    "stringify": StringifyMacro.self,
+    "Mocked": MockedMacro.self,
 ]
 #endif
 
 final class MockapellaTests: XCTestCase {
-    func testMacro() throws {
+    func testMacroWithBuiltInTypes() throws {
         #if canImport(MockapellaMacros)
         assertMacroExpansion(
             """
-            #stringify(a + b)
+            @Mocked
+            struct ABC {
+                let a: String
+                let b: Int
+            }
             """,
-            expandedSource: """
-            (a + b, "a + b")
+            expandedSource: #"""
+            struct ABC {
+                let a: String
+                let b: Int
+            
+                private init(
+                    _$a: Swift.String,
+                    _$b: Swift.Int
+                ) {
+                    self.a = _$a
+                    self.b = _$b
+                }
+            
+                static func mock(
+                    a: Swift.String = "a",
+                    b: Swift.Int = "b".count
+                ) -> Self {
+                    self.init(
+                    _$a: a,
+                    _$b: b
+                    )
+                }
+            }
+            """#,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testMacroWithCustomTypes() throws {
+        #if canImport(MockapellaMacros)
+        assertMacroExpansion(
+            """
+            @Mocked
+            struct ABC {
+                let a: String
+                let b: SomeCustomType
+            }
             """,
+            expandedSource: #"""
+            struct ABC {
+                let a: String
+                let b: SomeCustomType
+            
+                private init(
+                    _$a: Swift.String,
+                    _$b: SomeCustomType
+                ) {
+                    self.a = _$a
+                    self.b = _$b
+                }
+            
+                static func mock(
+                    a: Swift.String = "a",
+                    b: SomeCustomType = SomeCustomType.mock()
+                ) -> Self {
+                    self.init(
+                    _$a: a,
+                    _$b: b
+                    )
+                }
+            }
+            """#,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testMacroWithEnum() throws {
+        #if canImport(MockapellaMacros)
+        assertMacroExpansion(
+            """
+            @Mocked
+            enum ABC {
+                case firstCase
+                case thirdCase(count: Int, String, ABC)
+                case secondCase(Int)
+            }
+            """,
+            expandedSource: #"""
+            struct ABC {
+                let a: String
+                let b: SomeCustomType
+            
+                static func mockFirstCase() -> Self {
+                    ABC.firstCase
+                }
+            
+                static func mockSecondCase() -> Self {
+                    ABC.secondCase
+                }
+            }
+            """#,
             macros: testMacros
         )
         #else
@@ -30,19 +128,4 @@ final class MockapellaTests: XCTestCase {
         #endif
     }
 
-    func testMacroWithStringLiteral() throws {
-        #if canImport(MockapellaMacros)
-        assertMacroExpansion(
-            #"""
-            #stringify("Hello, \(name)")
-            """#,
-            expandedSource: #"""
-            ("Hello, \(name)", #""Hello, \(name)""#)
-            """#,
-            macros: testMacros
-        )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
-    }
 }
