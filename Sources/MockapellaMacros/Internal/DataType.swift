@@ -5,6 +5,8 @@
 //  Created by Dominik Grodl on 18.12.2025.
 //
 
+import Foundation
+import SwiftSyntax
 
 enum DataType: Equatable {
     case string
@@ -45,6 +47,20 @@ enum DataType: Equatable {
         case .boolean: "Bool".swiftQualified
         case .character: "Character".swiftQualified
         case .custom(let name): name
+        }
+    }
+    
+    func defaultValue(
+        variableName: String
+    ) -> String {
+        return switch self {
+        case .string: "\"\(variableName)\""
+        case .integer: "\"\(variableName)\".count"
+        case .float: "Float(\"\(variableName)\".count)"
+        case .double: "Double(\"\(variableName)\".count)"
+        case .boolean: "\(variableName.count.isMultiple(of: 2))"
+        case .character: "\"\(variableName.first!)\""
+        case .custom(let name): "\(name).mock()"
         }
     }
 }

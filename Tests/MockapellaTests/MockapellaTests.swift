@@ -108,16 +108,33 @@ final class MockapellaTests: XCTestCase {
             }
             """,
             expandedSource: #"""
-            struct ABC {
-                let a: String
-                let b: SomeCustomType
+            enum ABC {
+                case firstCase
+                case thirdCase(count: Int, String, ABC)
+                case secondCase(Int)
             
-                static func mockFirstCase() -> Self {
-                    ABC.firstCase
+                static func thirdCaseMock(
+                    count: Swift.Int = "count".count,
+                    arg1: Swift.String = "arg1",
+                    arg2: ABC = ABC.mock()
+                ) -> Self {
+                    ABC.thirdCase(
+                    count: count,
+                    arg1,
+                    arg2
+                    )
                 }
             
-                static func mockSecondCase() -> Self {
-                    ABC.secondCase
+                static func secondCaseMock(
+                    arg0: Swift.Int = "arg0".count
+                ) -> Self {
+                    ABC.secondCase(
+                    arg0
+                    )
+                }
+            
+                static func mock() -> Self {
+                    ABC.firstCaseMock()
                 }
             }
             """#,
