@@ -73,7 +73,7 @@ The defaults are not meant to represent a sensible value, but a quick way to get
 
 ## Usage
 
-Mocked macro can currently be applied to structs and enums.
+Mocked macro can currently be applied to non-generic structs and enums.
 
 ## Limitations
 
